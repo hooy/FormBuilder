@@ -30,6 +30,32 @@
               "precision": 2
             }
           ]
+        },
+        {
+          "type": "section",
+          "header": "Opportunity details 2",
+          "columns": 2,
+          "items": [
+            {
+              "type": "input",
+              "label": "Other section 2",
+              "value": "Some field",
+              "required": true
+            },
+            {
+              "type": "currency",
+              "label": "Currency field",
+              "value": 199,
+              "symbol": "EUR"
+            },
+            {
+              "type": "currency",
+              "label": "Another input",
+              "value": 140000,
+              "symbol": "EUR",
+              "precision": 2
+            }
+          ]
         }
       ]
     }
