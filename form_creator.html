@@ -127,8 +127,8 @@
                             id={id}
                             name={name}>
                             <div className="form-group">
-                            {items.map((item) =>
-                                <FormItem schema={item} />
+                            {items.map((item, index) =>
+                                <FormItem schema={item} key={index} />
                             )}
                             </div>
                             <button type="submit" className="btn btn-primary">Submit</button>
