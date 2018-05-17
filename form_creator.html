@@ -72,8 +72,8 @@
                                     <div className="card-body">
                                         <div className="form-row">
                                             <div className="row">
-                                                {Object.keys(column_items).map((row) =>
-                                                    <div className="col-sm">
+                                                {Object.keys(column_items).map((row, index) =>
+                                                    <div className="col-sm" key={index}>
                                                         {column_items[row]}
                                                     </div>
                                                 )}
