@@ -67,9 +67,9 @@
                             column_items[row].push(<FormItem schema={this.state.items[i]} key={i} />);
                         }
                         return (
-                                <div class="card">
-                                    <h5 class="card-header">{this.state.header}</h5>
-                                    <div class="card-body">
+                                <div className="card">
+                                    <h5 className="card-header">{this.state.header}</h5>
+                                    <div className="card-body">
                                         <div className="form-row">
                                             <div className="row">
                                                 {Object.keys(column_items).map((row) =>
@@ -122,6 +122,7 @@
 
                 return (
                     <div className="container">
+                        <h3>{name}</h3>
                         <form
                             id={id}
                             name={name}>
@@ -213,7 +214,7 @@
         }
 
             ReactDOM.render(
-                <Builder source="https://raw.githubusercontent.com/hooy/FormBuilder/master/data.json" />,
+                <Builder source="http://localhost:8000/static/swagger/data.json" />,
                 document.getElementById('root')
             );
 
