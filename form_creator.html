@@ -152,9 +152,8 @@
 
             getBuilder() {
                 const type = this.state.type;
-                console.log(type)
                 if (type == 'form') {
-                    return <Form id={this.state.id} name={this.state.name} items={this.state.items} />
+                    return <Form id={this.state.id} key={this.state.id} name={this.state.name} items={this.state.items} />
                 } else {
                     return <div>Unsupported widget: {type}</div>
                 }
