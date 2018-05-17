@@ -18,7 +18,6 @@
             constructor(props) {
                 super(props);
                 this.state = this.processProps(props);
-                console.log(props)
             }
 
 
@@ -62,14 +61,11 @@
                         var items_per_row = Math.ceil(item_count / this.state.columns);
                         for (var i = 0; i < item_count; i++) {
                             var row = ~~(i / items_per_row);
-                            if (row in column_items) {
-                                column_items[row].push(<FormItem schema={this.state.items[i]} key={i} />);
-                            } else{
+                            if (!(row in column_items)) {
                                 column_items[row] = [];
-                                column_items[row].push(<FormItem schema={this.state.items[i]} key={i} />);
                             }
+                            column_items[row].push(<FormItem schema={this.state.items[i]} key={i} />);
                         }
-                        console.log(column_items);
                         return (
                                 <div class="card">
                                     <h5 class="card-header">{this.state.header}</h5>
