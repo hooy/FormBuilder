@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <title>Form creator</title>
+        <script src="https://unpkg.com/react@16/umd/react.development.js"></script>
+        <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
+        <script src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"></script>
+        <link rel="stylesheet" id="theme" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css">
+    </head>
+    <body>
+        <div id="root"></div>
+        <script type="text/babel">
+
+
+        class FormItem extends React.Component {
+
+            constructor(props) {
+                super(props);
+                this.state = this.processProps(props);
+                console.log(props)
+            }
+
+
+
+            processProps(props) {
+                function getProp(schema, field, def) {
+                    return field in schema ? schema[field] : def;
+                }
+
+                const schema = props.schema;
+                const type = schema.type;
+                const header = getProp(schema, "header", "");
+                const columns = getProp(schema, "columns", 0);
+                const items = getProp(schema, "items", []);
+                const label = getProp(schema, "label", "");
+                const value = getProp(schema, "value", "");
+                const required = getProp(schema, "required", false);
+                const symbol = getProp(schema, "symbol", "EUR");
+                const precision = getProp(schema, "precision", 2);
+
+                return {
+                    schema,
+                    type,
+                    header,
+                    columns,
+                    items,
+                    label,
+                    value,
+                    required,
+                    symbol,
+                    precision,
+                }
+            }
+
+            htmlByItem() {
+                const type = this.state.type;
+                switch(type) {
+                    case "section":
+                        var column_items = {};
+                        var item_count = this.state.items.length;
+                        var items_per_row = Math.ceil(item_count / this.state.columns);
+                        for (var i = 0; i < item_count; i++) {
+                            var row = ~~(i / items_per_row);
+                            if (row in column_items) {
+                                column_items[row].push(<FormItem schema={this.state.items[i]} key={i} />);
+                            } else{
+                                column_items[row] = [];
+                                column_items[row].push(<FormItem schema={this.state.items[i]} key={i} />);
+                            }
+                        }
+                        console.log(column_items);
+                        return (
+                                <div class="card">
+                                    <h5 class="card-header">{this.state.header}</h5>
+                                    <div class="card-body">
+                                        <div className="form-row">
+                                            <div className="row">
+                                                {Object.keys(column_items).map((row) =>
+                                                    <div className="col-sm">
+                                                        {column_items[row]}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>)
+                    break;
+                    case "input":
+                        return (
+                            <div className="form-group">
+                                <label><small>{this.state.label}</small></label>
+                                <input type="text" className="form-control" defaultValue={this.state.value}
+                                       required={this.state.required ? 'required' : null} />
+                            </div>)
+                    break;
+                    case "currency":
+                        return (
+                             <div className="form-group">
+                                <label><small>{this.state.label}</small></label>
+                                <div className="input-group mb-3">
+                                    <div class="input-group-prepend">
+                                        <span className="input-group-text">{this.state.symbol}</span>
+                                    </div>
+                                    <input type="number" defaultValue={this.state.value}
+                                           data-number-to-fixed={this.state.precision}
+                                           className="form-control currency" required={this.state.required ? 'required' : null} />
+                                </div>
+                            </div>
+                        )
+              }
+            }
+
+            render () {
+                return this.htmlByItem()
+            }
+        }
+
+
+        class Form extends React.Component {
+
+            render () {
+                const {
+                    id, name, items
+                } = this.props;
+
+                return (
+                    <div className="container">
+                        <form
+                            id={id}
+                            name={name}>
+                            <div className="form-group">
+                            {items.map((item) =>
+                                <FormItem schema={item} />
+                            )}
+                            </div>
+                            <button type="submit" className="btn btn-primary">Submit</button>
+                        </form>
+                    </div>
+                )
+            }
+        }
+
+        class WidgetBuilder extends React.Component {
+            constructor(props) {
+                super(props);
+                this.state = {
+                    id: props.schema.id,
+                    name: props.schema.name,
+                    type: props.schema.type,
+                    items: props.schema.items,
+                    error: false,
+                }
+            }
+
+            getBuilder() {
+                const type = this.state.type;
+                console.log(type)
+                if (type == 'form') {
+                    return <Form id={this.state.id} name={this.state.name} items={this.state.items} />
+                } else {
+                    return <div>Unsupported widget: {type}</div>
+                }
+
+            }
+
+
+            render() {
+                return this.getBuilder();
+            }
+        }
+
+        class Builder extends React.Component {
+            constructor(props) {
+                super(props);
+                this.state = {
+                    error: null,
+                    isLoaded: false,
+                    widgets: []
+                };
+            }
+            componentDidMount() {
+                fetch(this.props.source)
+                    .then(res => res.json())
+                    .then(
+                        (result) => {
+                            this.setState({
+                                isLoaded: true,
+                                widgets: result.widgets
+                            });
+                        },
+                        // Note: it's important to handle errors here
+                        // instead of a catch() block so that we don't swallow
+                        // exceptions from actual bugs in components.
+                        (error) => {
+                            this.setState({
+                                isLoaded: true,
+                                error
+                            });
+                        }
+                    )
+            }
+
+            render() {
+                const { error, isLoaded, widgets } = this.state;
+                if (error) {
+                    return <div>Error: {error.message}</div>;
+                } else if (!isLoaded) {
+                    return <div>Loading...</div>;
+                } else {
+
+                    return widgets.map((widget) =>
+                        <WidgetBuilder key={widget.id} schema={widget} />
+                    );
+                }
+            }
+        }
+
+            ReactDOM.render(
+                <Builder source="https://raw.githubusercontent.com/hooy/FormBuilder/master/data.json" />,
+                document.getElementById('root')
+            );
+
+        </script>
+    </body>
+</html>
